@@ -327,7 +327,7 @@ break;
             (0xB6), 7, 0x02, 0x0D, 0x00, 0x10, 0x10, 0x00, 0x08,        //VSYNC VT=525, VPS=16, VPW=16, FPS=8
             (0xBA), 1, 0x0F,    //GPIO[3:0] out 1
             (0xB8), 2, 0x07, 0x01,      //GPIO3=input, GPIO[2:0]=output
-            (0xF0), 1, 0x03,    //pixel data interface
+            (0xF0), 1, 0x03,    //pixel data interface set to 0x00, for 8 bit
             TFTLCD_DELAY8, 1,
             0x28, 0,            //Display Off
             0x11, 0,            //Sleep Out
@@ -878,7 +878,7 @@ break;
 // ################## UNO SPECIAL for Stojanjos ###############
 #define USE_STOJANOS
 ...
-#elif defined(__AVR_ATmega328P__)  && defined(USE_STOJANOS)      // 
+#elif defined(__AVR_ATmega328P__)  && defined(USE_STOJANOS)      //
 #warning SPECIAL for USE_STOJANOS
 #define RD_PORT PORTC
 #define RD_PIN  0
@@ -1398,7 +1398,7 @@ break;
 //#define PIN_LOW(port, pin)    (port)->regs->BSRR = (1<<((pin)+16))
 #define PIN_LOW(port, pin)    (port)->regs->ODR &= ~(1<<(pin))
 #define PIN_OUTPUT(port, pin) gpio_set_mode(port, pin, GPIO_OUTPUT_PP)   //50MHz push-pull only 0-7
-#define PIN_INPUT(port, pin)  gpio_set_mode(port, pin, GPIO_INPUT_FLOATING)   //digital input 
+#define PIN_INPUT(port, pin)  gpio_set_mode(port, pin, GPIO_INPUT_FLOATING)   //digital input
 
 // ############################ STM32 BAART #####################################
 #define USE_BLUEPILL_ADAPTER
@@ -1458,7 +1458,7 @@ break;
 // ######################### STM32 PA8-15 ###################
 #define USE_MAGFLIP
 ...
-#elif  defined(USE_MAGFLIP) && (defined(__STM32F1__) || defined(STM32F103xB)) // MAPLECORE or STM32CORE 
+#elif  defined(USE_MAGFLIP) && (defined(__STM32F1__) || defined(STM32F103xB)) // MAPLECORE or STM32CORE
 #warning USE_MAGFLIP
 
 #if defined(ARDUINO_NUCLEO_F103C8)   //regular CMSIS libraries
@@ -1511,7 +1511,7 @@ break;
 // #################################### STM32 PIONSCOR 13SEP2020 #######################################
 #define USE_PIONSCOR_BLUEPILL
 ...
-#elif defined(USE_PIONSCOR_BLUEPILL) && (defined(__STM32F1__) || defined(ARDUINO_BLUEPILL_F103CB)) // MAPLECORE or STM32CORE 
+#elif defined(USE_PIONSCOR_BLUEPILL) && (defined(__STM32F1__) || defined(ARDUINO_BLUEPILL_F103CB)) // MAPLECORE or STM32CORE
 //LCD Pins : | D15| D14| D13| D12| D11| D10| D9| D8| D7| D6| D5| D4| D3|  D2| D1| D0|
 //BLUE PILL: |PB15|PB14|PB13|PB12|PB11|PB10|PB9|PB8|PB7|PB6|PB5|PB4|PB3|PA15|PB1|PB0|
 //LCD Pins : |RD  |WR  |RS  |CS  |RST |
@@ -1580,7 +1580,7 @@ break;
 // ######################### STM32 PB0-PB7 VADIMEL ###################
 #define USE_VADIMEL_MAPLEMINI
 ...
-#elif  defined(USE_VADIMEL_MAPLEMINI) && (defined(__STM32F1__) || defined(STM32F103xB)) // MAPLECORE or STM32CORE 
+#elif  defined(USE_VADIMEL_MAPLEMINI) && (defined(__STM32F1__) || defined(STM32F103xB)) // MAPLECORE or STM32CORE
 #warning USE_VADIMEL_MAPLEMINI
 
 #if defined(ARDUINO_NUCLEO_F103C8)   //regular CMSIS libraries
@@ -1634,7 +1634,7 @@ break;
 // ######################### STM32 PB8-PB15 RAVI_KANCHAN ###################
 #define USE_RAVI_KANCHAN_BLUEPILL
 ...
-#elif  defined(USE_RAVI_KANCHAN_BLUEPILL) && (defined(__STM32F1__) || defined(STM32F103xB)) // MAPLECORE or STM32CORE 
+#elif  defined(USE_RAVI_KANCHAN_BLUEPILL) && (defined(__STM32F1__) || defined(STM32F103xB)) // MAPLECORE or STM32CORE
 #warning USE_RAVI_KANCHAN_BLUEPILL
 
 #if defined(ARDUINO_NUCLEO_F103C8)   //regular CMSIS libraries
@@ -1689,7 +1689,7 @@ break;
 #elif defined(ESP32)       //regular UNO shield on TTGO D1 R32 (ESP32)
 #define LCD_RD  2  //LED
 #define LCD_WR  4
-#define LCD_RS 15  //hard-wired to A2 (GPIO35) 
+#define LCD_RS 15  //hard-wired to A2 (GPIO35)
 #define LCD_CS 33  //hard-wired to A3 (GPIO34)
 #define LCD_RST 32 //hard-wired to A4 (GPIO36)
 
