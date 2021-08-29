@@ -161,6 +161,7 @@ static uint16_t read16bits(void)
 
 uint16_t MCUFRIEND_kbv::readReg(uint16_t reg, int8_t index)
 {
+
     uint16_t ret;
     uint8_t lo;
     if (!done_reset)
@@ -168,6 +169,7 @@ uint16_t MCUFRIEND_kbv::readReg(uint16_t reg, int8_t index)
       Serial.println("reset hadn't been done, doing one now.");
       reset();
     }
+    Serial.print("readReg: 0x");Serial.print(reg,HEX);
     CS_ACTIVE;
     WriteCmd(reg);
     setReadDir();
@@ -177,7 +179,7 @@ uint16_t MCUFRIEND_kbv::readReg(uint16_t reg, int8_t index)
         ret = read16bits();
         if (reg == 0xA1)
         {
-          Serial.print("response: ");Serial.println(reg,HEX);
+          //Serial.print("response: ");Serial.println(reg,HEX);
         }
 
     } while (--index >= 0);  //need to test with SSD1963
@@ -185,22 +187,29 @@ uint16_t MCUFRIEND_kbv::readReg(uint16_t reg, int8_t index)
     RD_IDLE;
     CS_IDLE;
     setWriteDir();
+    Serial.print(" response: 0x");Serial.println(ret,HEX);
     return ret;
 }
 
 uint32_t MCUFRIEND_kbv::readReg32(uint16_t reg)
 {
+    Serial.print("readReg32: 0x");Serial.println(reg,HEX);
     uint16_t h = readReg(reg, 0);
     uint16_t l = readReg(reg, 1);
-    return ((uint32_t) h << 16) | (l);
+    uint32_t result = ((uint32_t) h << 16) | (l);
+    Serial.print(" response: 0x");Serial.println(result,HEX);
+    return result;
 }
 
 uint32_t MCUFRIEND_kbv::readReg40(uint16_t reg)
 {
+  Serial.print("readReg40: 0x");Serial.println(reg,HEX);
     uint16_t h = readReg(reg, 0);
     uint16_t m = readReg(reg, 1);
     uint16_t l = readReg(reg, 2);
-    return ((uint32_t) h << 24) | (m << 8) | (l >> 8);
+    uint32_t result = ((uint32_t) h << 24) | (m << 8) | (l >> 8);
+    Serial.print(" response: 0x");Serial.println(result,HEX);
+    return result;
 }
 
 uint16_t MCUFRIEND_kbv::readID(void)
@@ -208,7 +217,6 @@ uint16_t MCUFRIEND_kbv::readID(void)
     uint16_t ret, ret2;
     uint8_t msb;
     ret = readReg(0);           //forces a reset() if called before begin()
-    Serial.print("readReg(0) -> ");Serial.println(ret,HEX);
     if (ret == 0x5408)          //the SPFD5408 fails the 0xD3D3 test.
         return 0x5408;
     if (ret == 0x5420)          //the SPFD5420 fails the 0xD3D3 test.
@@ -216,16 +224,13 @@ uint16_t MCUFRIEND_kbv::readID(void)
     if (ret == 0x8989)          //SSD1289 is always 8989
         return 0x1289;
     ret = readReg(0x67);        //HX8347-A
-    Serial.print("readReg(0x67) -> ");Serial.println(ret,HEX);
     if (ret == 0x4747)
         return 0x8347;
     ret = readReg40(0xEF);      //ILI9327: [xx 02 04 93 27 FF]
-    Serial.print("readReg40(0xEF) -> ");Serial.println(ret,HEX);
     if (ret == 0x9327)
         return 0x9327;
 //#if defined(SUPPORT_1963) && USING_16BIT_BUS
     ret = readReg32(0xA1);      //SSD1963: [01 57 61 01]
-    Serial.print("readReg32(0xA1) -> ");Serial.println(ret,HEX);
     if (ret == 0x6101)
         return 0x1963;
     if (ret == 0xFFFF)          //R61526: [xx FF FF FF]
@@ -236,7 +241,6 @@ uint16_t MCUFRIEND_kbv::readID(void)
         return 0x05A1;          //subsequent begin() enables Command Access
 //#endif
 	ret = readReg40(0xBF);
-  Serial.print("readReg40(0xBF) -> ");Serial.println(ret,HEX);
 	if (ret == 0x8357)          //HX8357B: [xx 01 62 83 57 FF]
         return 0x8357;
 	if (ret == 0x9481)          //ILI9481: [xx 02 04 94 81 FF]
@@ -252,19 +256,15 @@ uint16_t MCUFRIEND_kbv::readID(void)
     if (ret == 0x1400)          //?RM68140:[xx FF 68 14 00] not tested yet
         return 0x6814;
     ret = readReg32(0xD4);
-    Serial.print("readReg32(0xD4) -> ");Serial.println(ret,HEX);
     if (ret == 0x5310)          //NT35310: [xx 01 53 10]
         return 0x5310;
     ret = readReg32(0xD7);
-    Serial.print("readReg32(0xD7) -> ");Serial.println(ret,HEX);
     if (ret == 0x8031)          //weird unknown from BangGood [xx 20 80 31] PrinceCharles
         return 0x8031;
     ret = readReg32(0xFE) >> 8; //weird unknown from BangGood [04 20 53]
-    Serial.print("readReg32(0xFE) -> ");Serial.println(ret,HEX);
     if (ret == 0x2053)
         return 0x2053;
     uint32_t ret32 = readReg32(0x04);
-    Serial.print("readReg32(0x04) -> ");Serial.println(ret32,HEX);
     msb = ret32 >> 16;
     ret = ret32;
     if (msb == 0xE3 && ret == 0x0000) return 0xE300; //reg(04) = [xx E3 00 00] BangGood
@@ -274,7 +274,6 @@ uint16_t MCUFRIEND_kbv::readID(void)
         uint8_t cmds[] = {0xFF, 0x83, 0x57};
         pushCommand(0xB9, cmds, 3);
         msb = readReg(0xD0);
-        Serial.print("readReg(0xD0) -> ");Serial.println(msb,HEX);
 
         if (msb == 0x99) return 0x0099; //HX8357-D from datasheet
         if (msb == 0x90)        //HX8357-C undocumented
@@ -292,12 +291,10 @@ uint16_t MCUFRIEND_kbv::readID(void)
     if (ret == 0xAC11)          //?unknown [xx 61 AC 11]
         return 0xAC11;
     ret32 = readReg32(0xD3);      //[xx 91 63 00]
-    Serial.print("readReg32(0xD3) -> ");Serial.println(ret32,HEX);
 
     ret = ret32 >> 8;
     if (ret == 0x9163) return ret;
     ret = readReg32(0xD3);      //for ILI9488, 9486, 9340, 9341
-    Serial.print("readReg32(0xD3) -> ");Serial.println(ret,HEX);
 
     if (ret == 0x3229) return ret;
     msb = ret >> 8;
@@ -317,8 +314,6 @@ uint16_t MCUFRIEND_kbv::readID(void)
 */
 
 ret = readReg(0);
-Serial.print("readReg(0) -> ");Serial.println(ret,HEX);
-
 	return ret;          //0154, 7783, 9320, 9325, 9335, B505, B509
 }
 
@@ -1303,10 +1298,14 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
 
 #if defined(SUPPORT_1963)
     case 0x1963:
+      Serial.println("Into support_1963");
         _lcd_capable = AUTO_READINC | MIPI_DCS_REV1 | READ_NODUMMY | INVERT_SS | INVERT_RGB;
 #if USING_16BIT_BUS
 #define SSD1963_PIXDATA 0x03
+      Serial.println("using 16 bit pixel def");
 #else
+      Serial.println("using 8 bit pixel def");
+
 #define SSD1963_PIXDATA 0x00
         is9797 = 1;
         _lcd_capable |= READ_24BITS;
@@ -1383,6 +1382,7 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
             (0xB6), 7, 0x02, 0x0D, 0x00, 0x10, 0x10, 0x00, 0x08,        //VSYNC VT=525, VPS=16, VPW=16, FPS=8
             (0xBA), 1, 0x0F,    //GPIO[3:0] out 1
             (0xB8), 2, 0x07, 0x01,      //GPIO3=input, GPIO[2:0]=output
+            (0x36), 1, 0x2A, //MINE - rotation
             (0xF0), 1, SSD1963_PIXDATA,    //pixel data interface
             TFTLCD_DELAY8, 1,
             0x28, 0,            //Display Off
@@ -1391,6 +1391,59 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
             0x29, 0,            //Display On
             (0xBE), 6, 0x06, 0xF0, 0x01, 0xF0, 0x00, 0x00,      //set PWM for B/L
             (0xD0), 1, 0x0D,
+        };
+        // from UTFTv2.82 initlcd.h
+        static const uint8_t SSD1963_800NEW2_regValues[] PROGMEM = {
+            (0xE2), 3, 0x1E, 0x02, 0x54,        //PLL multiplier, set PLL clock to 120M
+            (0xE0), 1, 0x01,    // PLL enable
+            TFTLCD_DELAY8, 10,
+            (0xE0), 1, 0x03,    //
+            TFTLCD_DELAY8, 10,
+            0x01, 0,            //Soft Reset
+            TFTLCD_DELAY8, 100,
+            (0xE6), 3, 0x03, 0xFF, 0xFF,        //PLL setting for PCLK, depends on resolution
+            (0xB0), 7, 0x20, 0x00, 0x03, 0x1F, 0x01, 0xDF, 0x00,        //LCD SPECIFICATION
+//            (0xB0), 7, 0x24, 0x00, 0x03, 0x1F, 0x01, 0xDF, 0x00,        //LCD SPECIFICATION
+            (0xB4), 8, 0x03, 0xA0, 0x00, 0x2E, 0x30, 0x00, 0x0F, 0x00,  //HSYNC HT=928, HPS=46, HPW=48, LPS=15
+            (0xB6), 7, 0x02, 0x0D, 0x00, 0x10, 0x10, 0x00, 0x08,        //VSYNC VT=525, VPS=16, VPW=16, FPS=8
+            (0xBA), 1, 0x0F,    //GPIO[3:0] out 1
+            (0xB8), 2, 0x07, 0x01,      //GPIO3=input, GPIO[2:0]=output
+            (0x36), 1, 0x2A, //MINE - rotation
+            (0xF0), 1, SSD1963_PIXDATA,    //pixel data interface
+            TFTLCD_DELAY8, 1,
+            (0xB8), 2, 0x0f, 0x01,      //GPIO3=input, GPIO[2:0]=output
+            (0xBA), 1, 0x01,    //GPIO[3:0] out 1
+
+
+	// setXY(0, 0, 799, 479);
+  //
+  // swap(word, x1, y1);
+  // swap(word, x2, y2);
+  // LCD_Write_COM(0x2a);
+  //   LCD_Write_DATA(0);
+  //   LCD_Write_DATA(0);
+  //   LCD_Write_DATA(480>>8);
+  //   LCD_Write_DATA(480 & 0xFF);
+  // LCD_Write_COM(0x2b);
+  //   LCD_Write_DATA(0);
+  //   LCD_Write_DATA(0);
+  //   LCD_Write_DATA(800>>8);
+  //   LCD_Write_DATA(800 & 0xFF);
+  // LCD_Write_COM(0x2c);
+
+            (0x2A), 4, 0, 0, 480>>8, 480 & 0xFF,
+            (0x2B), 4, 0, 0, 800>>8, 800 & 0xFF,
+
+            // (0x2A), 4, 0, 0, 800>>8, 800 & 0xFF,
+            // (0x2B), 4, 0, 0, 480>>8, 480 & 0xFF,
+            //
+            (0x2C), 0,
+
+
+            (0x29), 0,            //Display On
+            (0xBE), 6, 0x06, 0xF0, 0x01, 0xF0, 0x00, 0x00,      //set PWM for B/L
+            (0xD0), 1, 0x0D,
+            (0x2C), 0,
         };
         // from UTFTv2.82 initlcd.h
         static const uint8_t SSD1963_800ALT_regValues[] PROGMEM = {
@@ -1441,15 +1494,17 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
             (0xD0), 1, 0x0D,
         };
 //        table8_ads = SSD1963_480_regValues, table_size = sizeof(SSD1963_480_regValues);
-        table8_ads = SSD1963_800_regValues, table_size = sizeof(SSD1963_800_regValues);
+//        table8_ads = SSD1963_800_regValues, table_size = sizeof(SSD1963_800_regValues);
 //        table8_ads = SSD1963_NHD_50_regValues, table_size = sizeof(SSD1963_NHD_50_regValues);
 //        table8_ads = SSD1963_NHD_70_regValues, table_size = sizeof(SSD1963_NHD_70_regValues);
 //        table8_ads = SSD1963_800NEW_regValues, table_size = sizeof(SSD1963_800NEW_regValues);
+        table8_ads = SSD1963_800NEW2_regValues, table_size = sizeof(SSD1963_800NEW2_regValues);
 //        table8_ads = SSD1963_800ALT_regValues, table_size = sizeof(SSD1963_800ALT_regValues);
         p16 = (int16_t *) & HEIGHT;
         *p16 = 480;
         p16 = (int16_t *) & WIDTH;
         *p16 = 800;
+        Serial.println("written ssd1963 startup commands");
         break;
 #endif
 
@@ -3078,6 +3133,7 @@ case 0x4532:    // thanks Leodino
     }
     _lcd_rev = ((_lcd_capable & REV_SCREEN) != 0);
     if (table8_ads != NULL) {
+      Serial.println("ln3136");
         static const uint8_t reset_off[] PROGMEM = {
             0x01, 0,            //Soft Reset
             TFTLCD_DELAY8, 150,  // .kbv will power up with ONLY reset, sleep out, display on
@@ -3089,9 +3145,9 @@ case 0x4532:    // thanks Leodino
             TFTLCD_DELAY8, 150,
             0x29, 0,            //Display On
         };
-		init_table(&reset_off, sizeof(reset_off));
-	    init_table(table8_ads, table_size);   //can change PIXFMT
-		init_table(&wake_on, sizeof(wake_on));
+  		init_table(&reset_off, sizeof(reset_off));
+  	  init_table(table8_ads, table_size);   //can change PIXFMT
+  		init_table(&wake_on, sizeof(wake_on));
     }
     setRotation(0);             //PORTRAIT
     invertDisplay(false);
