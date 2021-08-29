@@ -1,5 +1,5 @@
 // only define one "USE_XXX" macro at any time
-//#define USING_MCU_SPECIAL
+
 //#define USE_MEGA_8BIT_PROTOSHIELD
 //#define USE_MEGA_8BIT_SHIELD      // 4.7sec Mega2560 Shield
 //#define USE_MEGA_8BIT_PORTC_SHIELD // 4.7sec Mega2560 Shield
@@ -517,7 +517,7 @@ static __attribute((always_inline)) void write_8(uint8_t val)
 #define PIN_OUTPUT(p, b)     *(&p-1) |= (1<<(b))
 
 #elif defined(__AVR_ATmega2560__) && defined(USE_MEGA_16BIT_SHIELD)
-#warning USE_MEGA_16BIT_SHIELD and 16bit bus
+#warning USE_MEGA_16BIT_SHIELD
 #define USES_16BIT_BUS
 #define RD_PORT PORTL
 #define RD_PIN  6        //PL6 (D43).   Graham has PA15 (D24) on Due Shield
@@ -529,7 +529,7 @@ static __attribute((always_inline)) void write_8(uint8_t val)
 #define CS_PIN  1        //D40 CTE
 #define RESET_PORT PORTG
 #define RESET_PIN  0     //D41 CTE
-#define Using16BitMega
+
 #define write_8(x)    { PORTC = x; }
 #define write_16(x)   { PORTA = (x) >> 8; PORTC = x; }
 
@@ -558,8 +558,6 @@ static __attribute((always_inline)) void write_8(uint8_t val)
 #define CS_PIN  1        //D40 CTE
 #define RESET_PORT PORTG
 #define RESET_PIN  0     //D41 CTE
-#define Using8BitMega
-
 
 #define write_8(x)   { PORTA = x;}
 
@@ -587,7 +585,7 @@ static __attribute((always_inline)) void write_8(uint8_t val)
 #define CS_PIN  1        //D40 CTE
 #define RESET_PORT PORTG
 #define RESET_PIN  0     //D41 CTE
-#define Using8BitMegaPortC
+
 #define write_8(x)   { PORTC = x;}
 
 #define read_8()      ( PINC )
@@ -800,7 +798,7 @@ static __attribute((always_inline)) void write_8(uint8_t val)
 #define PIN_OUTPUT(port, pin) (port)->PIO_OER = (1<<(pin))
 
 #elif defined(__SAM3X8E__) && defined(USE_MEGA_16BIT_SHIELD)  //regular MEGA shield on DUE
-#warning USE_MEGA_16BIT_SHIELD with __SAM3X8E__ 
+#warning USE_MEGA_16BIT_SHIELD
 #define USES_16BIT_BUS
 // configure macros for the control pins
 #define RD_PORT PIOA

@@ -1203,20 +1203,36 @@ static void setReadDir()
 
 #endif                          //!defined(USE_SPECIAL) || defined (USE_SPECIAL_FAIL)
 
+// #define RD_ACTIVE  PIN_LOW(RD_PORT, RD_PIN)
+// #define RD_IDLE    PIN_HIGH(RD_PORT, RD_PIN)
+// #define RD_OUTPUT  PIN_OUTPUT(RD_PORT, RD_PIN)
+// #define WR_ACTIVE  PIN_LOW(WR_PORT, WR_PIN);Serial.println("\tset WR port&pin low");
+// #define WR_IDLE    PIN_HIGH(WR_PORT, WR_PIN);Serial.println("\tset WR port&pin high");
+// #define WR_OUTPUT  PIN_OUTPUT(WR_PORT, WR_PIN)
+// #define CD_COMMAND PIN_LOW(CD_PORT, CD_PIN);Serial.println("\tset CD port&pin low");
+// #define CD_DATA    PIN_HIGH(CD_PORT, CD_PIN);Serial.println("\tset CD port&pin high");
+// #define CD_OUTPUT  PIN_OUTPUT(CD_PORT, CD_PIN)
+// #define CS_ACTIVE  PIN_LOW(CS_PORT, CS_PIN);Serial.println("\tset CS port&pin low");
+// #define CS_IDLE    PIN_HIGH(CS_PORT, CS_PIN);Serial.println("\tset CS port&pin high");
+// #define CS_OUTPUT  PIN_OUTPUT(CS_PORT, CS_PIN)
+// #define RESET_ACTIVE  PIN_LOW(RESET_PORT, RESET_PIN);Serial.println("\tset RESET port&pin low");
+// #define RESET_IDLE    PIN_HIGH(RESET_PORT, RESET_PIN);Serial.println("\tset RESET port&pin high");
+// #define RESET_OUTPUT  PIN_OUTPUT(RESET_PORT, RESET_PIN)
+
 #define RD_ACTIVE  PIN_LOW(RD_PORT, RD_PIN)
 #define RD_IDLE    PIN_HIGH(RD_PORT, RD_PIN)
 #define RD_OUTPUT  PIN_OUTPUT(RD_PORT, RD_PIN)
-#define WR_ACTIVE  PIN_LOW(WR_PORT, WR_PIN)
-#define WR_IDLE    PIN_HIGH(WR_PORT, WR_PIN)
+#define WR_ACTIVE  PIN_LOW(WR_PORT, WR_PIN);
+#define WR_IDLE    PIN_HIGH(WR_PORT, WR_PIN);
 #define WR_OUTPUT  PIN_OUTPUT(WR_PORT, WR_PIN)
-#define CD_COMMAND PIN_LOW(CD_PORT, CD_PIN)
-#define CD_DATA    PIN_HIGH(CD_PORT, CD_PIN)
+#define CD_COMMAND PIN_LOW(CD_PORT, CD_PIN);
+#define CD_DATA    PIN_HIGH(CD_PORT, CD_PIN);
 #define CD_OUTPUT  PIN_OUTPUT(CD_PORT, CD_PIN)
-#define CS_ACTIVE  PIN_LOW(CS_PORT, CS_PIN)
-#define CS_IDLE    PIN_HIGH(CS_PORT, CS_PIN)
+#define CS_ACTIVE  PIN_LOW(CS_PORT, CS_PIN);
+#define CS_IDLE    PIN_HIGH(CS_PORT, CS_PIN);
 #define CS_OUTPUT  PIN_OUTPUT(CS_PORT, CS_PIN)
-#define RESET_ACTIVE  PIN_LOW(RESET_PORT, RESET_PIN)
-#define RESET_IDLE    PIN_HIGH(RESET_PORT, RESET_PIN)
+#define RESET_ACTIVE  PIN_LOW(RESET_PORT, RESET_PIN);
+#define RESET_IDLE    PIN_HIGH(RESET_PORT, RESET_PIN);
 #define RESET_OUTPUT  PIN_OUTPUT(RESET_PORT, RESET_PIN)
 
  // General macros.   IOCLR registers are 1 cycle when optimised.

@@ -166,10 +166,10 @@ uint16_t MCUFRIEND_kbv::readReg(uint16_t reg, int8_t index)
     uint8_t lo;
     if (!done_reset)
     {
-      Serial.println("reset hadn't been done, doing one now.");
+      //Serial.println("reset hadn't been done, doing one now.");
       reset();
     }
-    Serial.print("readReg: 0x");Serial.print(reg,HEX);
+    //Serial.print("readReg: 0x");//Serial.print(reg,HEX);
     CS_ACTIVE;
     WriteCmd(reg);
     setReadDir();
@@ -179,7 +179,7 @@ uint16_t MCUFRIEND_kbv::readReg(uint16_t reg, int8_t index)
         ret = read16bits();
         if (reg == 0xA1)
         {
-          //Serial.print("response: ");Serial.println(reg,HEX);
+          ////Serial.print("response: ");//Serial.println(reg,HEX);
         }
 
     } while (--index >= 0);  //need to test with SSD1963
@@ -187,28 +187,28 @@ uint16_t MCUFRIEND_kbv::readReg(uint16_t reg, int8_t index)
     RD_IDLE;
     CS_IDLE;
     setWriteDir();
-    Serial.print(" response: 0x");Serial.println(ret,HEX);
+    //Serial.print(" response: 0x");//Serial.println(ret,HEX);
     return ret;
 }
 
 uint32_t MCUFRIEND_kbv::readReg32(uint16_t reg)
 {
-    Serial.print("readReg32: 0x");Serial.println(reg,HEX);
+    //Serial.print("readReg32: 0x");//Serial.println(reg,HEX);
     uint16_t h = readReg(reg, 0);
     uint16_t l = readReg(reg, 1);
     uint32_t result = ((uint32_t) h << 16) | (l);
-    Serial.print(" response: 0x");Serial.println(result,HEX);
+    //Serial.print(" response: 0x");//Serial.println(result,HEX);
     return result;
 }
 
 uint32_t MCUFRIEND_kbv::readReg40(uint16_t reg)
 {
-  Serial.print("readReg40: 0x");Serial.println(reg,HEX);
+  //Serial.print("readReg40: 0x");//Serial.println(reg,HEX);
     uint16_t h = readReg(reg, 0);
     uint16_t m = readReg(reg, 1);
     uint16_t l = readReg(reg, 2);
     uint32_t result = ((uint32_t) h << 24) | (m << 8) | (l >> 8);
-    Serial.print(" response: 0x");Serial.println(result,HEX);
+    //Serial.print(" response: 0x");//Serial.println(result,HEX);
     return result;
 }
 
@@ -274,7 +274,6 @@ uint16_t MCUFRIEND_kbv::readID(void)
         uint8_t cmds[] = {0xFF, 0x83, 0x57};
         pushCommand(0xB9, cmds, 3);
         msb = readReg(0xD0);
-
         if (msb == 0x99) return 0x0099; //HX8357-D from datasheet
         if (msb == 0x90)        //HX8357-C undocumented
 #endif
@@ -291,11 +290,9 @@ uint16_t MCUFRIEND_kbv::readID(void)
     if (ret == 0xAC11)          //?unknown [xx 61 AC 11]
         return 0xAC11;
     ret32 = readReg32(0xD3);      //[xx 91 63 00]
-
     ret = ret32 >> 8;
     if (ret == 0x9163) return ret;
     ret = readReg32(0xD3);      //for ILI9488, 9486, 9340, 9341
-
     if (ret == 0x3229) return ret;
     msb = ret >> 8;
     if (msb == 0x93 || msb == 0x94 || msb == 0x98 || msb == 0x77 || msb == 0x16)
@@ -879,20 +876,25 @@ void MCUFRIEND_kbv::invertDisplay(bool i)
 static void init_table(const void *table, int16_t size)
 {
     //copes with any uint8_t table.  Even HX8347 style
+    //Serial.println("init_table call");
+
     uint8_t *p = (uint8_t *) table;
     while (size > 0) {
         uint8_t cmd = pgm_read_byte(p++);
         uint8_t len = pgm_read_byte(p++);
         if (cmd == TFTLCD_DELAY8) {
+            //Serial.print("delay: ");//Serial.println(len);
             delay(len);
             len = 0;
         } else {
+            //Serial.print("command: 0x");//Serial.println(cmd,HEX);
             CS_ACTIVE;
             CD_COMMAND;
             write8(cmd);
             for (uint8_t d = 0; d++ < len; ) {
                 uint8_t x = pgm_read_byte(p++);
                 CD_DATA;
+                //Serial.print("\t0x");//Serial.println(x,HEX);
                 write8(x);
                 if (is8347 && d < len) {
                     CD_COMMAND;
@@ -901,6 +903,7 @@ static void init_table(const void *table, int16_t size)
                 }
             }
             CS_IDLE;
+            //Serial.println("");
         }
         size -= len + 2;
     }
@@ -1298,13 +1301,13 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
 
 #if defined(SUPPORT_1963)
     case 0x1963:
-      Serial.println("Into support_1963");
+      //Serial.println("Into support_1963");
         _lcd_capable = AUTO_READINC | MIPI_DCS_REV1 | READ_NODUMMY | INVERT_SS | INVERT_RGB;
 #if USING_16BIT_BUS
 #define SSD1963_PIXDATA 0x03
-      Serial.println("using 16 bit pixel def");
+      //Serial.println("using 16 bit pixel def");
 #else
-      Serial.println("using 8 bit pixel def");
+      //Serial.println("using 8 bit pixel def");
 
 #define SSD1963_PIXDATA 0x00
         is9797 = 1;
@@ -1382,7 +1385,6 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
             (0xB6), 7, 0x02, 0x0D, 0x00, 0x10, 0x10, 0x00, 0x08,        //VSYNC VT=525, VPS=16, VPW=16, FPS=8
             (0xBA), 1, 0x0F,    //GPIO[3:0] out 1
             (0xB8), 2, 0x07, 0x01,      //GPIO3=input, GPIO[2:0]=output
-            (0x36), 1, 0x2A, //MINE - rotation
             (0xF0), 1, SSD1963_PIXDATA,    //pixel data interface
             TFTLCD_DELAY8, 1,
             0x28, 0,            //Display Off
@@ -1403,7 +1405,6 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
             TFTLCD_DELAY8, 100,
             (0xE6), 3, 0x03, 0xFF, 0xFF,        //PLL setting for PCLK, depends on resolution
             (0xB0), 7, 0x20, 0x00, 0x03, 0x1F, 0x01, 0xDF, 0x00,        //LCD SPECIFICATION
-//            (0xB0), 7, 0x24, 0x00, 0x03, 0x1F, 0x01, 0xDF, 0x00,        //LCD SPECIFICATION
             (0xB4), 8, 0x03, 0xA0, 0x00, 0x2E, 0x30, 0x00, 0x0F, 0x00,  //HSYNC HT=928, HPS=46, HPW=48, LPS=15
             (0xB6), 7, 0x02, 0x0D, 0x00, 0x10, 0x10, 0x00, 0x08,        //VSYNC VT=525, VPS=16, VPW=16, FPS=8
             (0xBA), 1, 0x0F,    //GPIO[3:0] out 1
@@ -1414,22 +1415,6 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
             (0xB8), 2, 0x0f, 0x01,      //GPIO3=input, GPIO[2:0]=output
             (0xBA), 1, 0x01,    //GPIO[3:0] out 1
 
-
-	// setXY(0, 0, 799, 479);
-  //
-  // swap(word, x1, y1);
-  // swap(word, x2, y2);
-  // LCD_Write_COM(0x2a);
-  //   LCD_Write_DATA(0);
-  //   LCD_Write_DATA(0);
-  //   LCD_Write_DATA(480>>8);
-  //   LCD_Write_DATA(480 & 0xFF);
-  // LCD_Write_COM(0x2b);
-  //   LCD_Write_DATA(0);
-  //   LCD_Write_DATA(0);
-  //   LCD_Write_DATA(800>>8);
-  //   LCD_Write_DATA(800 & 0xFF);
-  // LCD_Write_COM(0x2c);
 
             (0x2A), 4, 0, 0, 480>>8, 480 & 0xFF,
             (0x2B), 4, 0, 0, 800>>8, 800 & 0xFF,
@@ -1494,17 +1479,17 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
             (0xD0), 1, 0x0D,
         };
 //        table8_ads = SSD1963_480_regValues, table_size = sizeof(SSD1963_480_regValues);
-//        table8_ads = SSD1963_800_regValues, table_size = sizeof(SSD1963_800_regValues);
+        table8_ads = SSD1963_800_regValues, table_size = sizeof(SSD1963_800_regValues);
 //        table8_ads = SSD1963_NHD_50_regValues, table_size = sizeof(SSD1963_NHD_50_regValues);
 //        table8_ads = SSD1963_NHD_70_regValues, table_size = sizeof(SSD1963_NHD_70_regValues);
 //        table8_ads = SSD1963_800NEW_regValues, table_size = sizeof(SSD1963_800NEW_regValues);
-        table8_ads = SSD1963_800NEW2_regValues, table_size = sizeof(SSD1963_800NEW2_regValues);
+//        table8_ads = SSD1963_800NEW2_regValues, table_size = sizeof(SSD1963_800NEW2_regValues);
 //        table8_ads = SSD1963_800ALT_regValues, table_size = sizeof(SSD1963_800ALT_regValues);
         p16 = (int16_t *) & HEIGHT;
         *p16 = 480;
         p16 = (int16_t *) & WIDTH;
         *p16 = 800;
-        Serial.println("written ssd1963 startup commands");
+        //Serial.println("written ssd1963 startup commands");
         break;
 #endif
 
@@ -3133,7 +3118,7 @@ case 0x4532:    // thanks Leodino
     }
     _lcd_rev = ((_lcd_capable & REV_SCREEN) != 0);
     if (table8_ads != NULL) {
-      Serial.println("ln3136");
+      //Serial.println("line 3121");
         static const uint8_t reset_off[] PROGMEM = {
             0x01, 0,            //Soft Reset
             TFTLCD_DELAY8, 150,  // .kbv will power up with ONLY reset, sleep out, display on
@@ -3145,9 +3130,9 @@ case 0x4532:    // thanks Leodino
             TFTLCD_DELAY8, 150,
             0x29, 0,            //Display On
         };
-  		init_table(&reset_off, sizeof(reset_off));
-  	  init_table(table8_ads, table_size);   //can change PIXFMT
-  		init_table(&wake_on, sizeof(wake_on));
+		init_table(&reset_off, sizeof(reset_off));
+	    init_table(table8_ads, table_size);   //can change PIXFMT
+		init_table(&wake_on, sizeof(wake_on));
     }
     setRotation(0);             //PORTRAIT
     invertDisplay(false);
