@@ -327,7 +327,7 @@ break;
             (0xB6), 7, 0x02, 0x0D, 0x00, 0x10, 0x10, 0x00, 0x08,        //VSYNC VT=525, VPS=16, VPW=16, FPS=8
             (0xBA), 1, 0x0F,    //GPIO[3:0] out 1
             (0xB8), 2, 0x07, 0x01,      //GPIO3=input, GPIO[2:0]=output
-            (0xF0), 1, 0x03,    //pixel data interface set to 0x00, for 8 bit
+            (0xF0), 1, 0x03,    //pixel data interface
             TFTLCD_DELAY8, 1,
             0x28, 0,            //Display Off
             0x11, 0,            //Sleep Out

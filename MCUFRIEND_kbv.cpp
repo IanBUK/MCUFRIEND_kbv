@@ -1,14 +1,14 @@
 //#define SUPPORT_0139              //S6D0139 +280 bytes
-//#define SUPPORT_0154              //S6D0154 +320 bytes
+#define SUPPORT_0154              //S6D0154 +320 bytes
 //#define SUPPORT_05A1              //for S6D05A1
 //#define SUPPORT_1289              //SSD1289,SSD1297 (ID=0x9797) +626 bytes, 0.03s
 //#define SUPPORT_1580              //R61580 Untested
 #define SUPPORT_1963              //only works with 16BIT bus anyway
 //#define SUPPORT_4532              //LGDP4532 +120 bytes.  thanks Leodino
-//#define SUPPORT_4535              //LGDP4535 +180 bytes
-//#define SUPPORT_68140             //RM68140 +52 bytes defaults to PIXFMT=0x55
+#define SUPPORT_4535              //LGDP4535 +180 bytes
+#define SUPPORT_68140             //RM68140 +52 bytes defaults to PIXFMT=0x55
 //#define SUPPORT_7735
-//#define SUPPORT_7781              //ST7781 +172 bytes
+#define SUPPORT_7781              //ST7781 +172 bytes
 //#define SUPPORT_8230              //UC8230 +118 bytes
 //#define SUPPORT_8347D             //HX8347-D, HX8347-G, HX8347-I, HX8367-A +520 bytes, 0.27s
 //#define SUPPORT_8347A             //HX8347-A +500 bytes, 0.27s
@@ -17,13 +17,13 @@
 //#define SUPPORT_8357D_GAMMA       //monster 34 byte
 //#define SUPPORT_9163              //
 //#define SUPPORT_9225              //ILI9225-B, ILI9225-G ID=0x9225, ID=0x9226, ID=0x6813 +380 bytes
-//#define SUPPORT_9320              //ID=0x0001, R61505, SPFD5408, ILI9320
-//#define SUPPORT_9325              //RM68090, ILI9325, ILI9328, ILI9331, ILI9335
+#define SUPPORT_9320              //ID=0x0001, R61505, SPFD5408, ILI9320
+#define SUPPORT_9325              //RM68090, ILI9325, ILI9328, ILI9331, ILI9335 
 //#define SUPPORT_9326_5420         //ILI9326, SPFD5420 +246 bytes
 //#define SUPPORT_9342              //costs +114 bytes
 //#define SUPPORT_9806              //UNTESTED
-//#define SUPPORT_9488_555          //costs +230 bytes, 0.03s / 0.19s
-//#define SUPPORT_B509_7793         //R61509, ST7793 +244 bytes
+#define SUPPORT_9488_555          //costs +230 bytes, 0.03s / 0.19s
+#define SUPPORT_B509_7793         //R61509, ST7793 +244 bytes
 #define OFFSET_9327 32            //costs about 103 bytes, 0.08s
 
 #include "MCUFRIEND_kbv.h"
@@ -161,55 +161,35 @@ static uint16_t read16bits(void)
 
 uint16_t MCUFRIEND_kbv::readReg(uint16_t reg, int8_t index)
 {
-
     uint16_t ret;
     uint8_t lo;
     if (!done_reset)
-    {
-      //Serial.println("reset hadn't been done, doing one now.");
-      reset();
-    }
-    //Serial.print("readReg: 0x");//Serial.print(reg,HEX);
+        reset();
     CS_ACTIVE;
     WriteCmd(reg);
     setReadDir();
     delay(1);    //1us should be adequate
     //    READ_16(ret);
-    do {
-        ret = read16bits();
-        if (reg == 0xA1)
-        {
-          ////Serial.print("response: ");//Serial.println(reg,HEX);
-        }
-
-    } while (--index >= 0);  //need to test with SSD1963
-
+    do { ret = read16bits(); }while (--index >= 0);  //need to test with SSD1963
     RD_IDLE;
     CS_IDLE;
     setWriteDir();
-    //Serial.print(" response: 0x");//Serial.println(ret,HEX);
     return ret;
 }
 
 uint32_t MCUFRIEND_kbv::readReg32(uint16_t reg)
 {
-    //Serial.print("readReg32: 0x");//Serial.println(reg,HEX);
     uint16_t h = readReg(reg, 0);
     uint16_t l = readReg(reg, 1);
-    uint32_t result = ((uint32_t) h << 16) | (l);
-    //Serial.print(" response: 0x");//Serial.println(result,HEX);
-    return result;
+    return ((uint32_t) h << 16) | (l);
 }
 
 uint32_t MCUFRIEND_kbv::readReg40(uint16_t reg)
 {
-  //Serial.print("readReg40: 0x");//Serial.println(reg,HEX);
     uint16_t h = readReg(reg, 0);
     uint16_t m = readReg(reg, 1);
     uint16_t l = readReg(reg, 2);
-    uint32_t result = ((uint32_t) h << 24) | (m << 8) | (l >> 8);
-    //Serial.print(" response: 0x");//Serial.println(result,HEX);
-    return result;
+    return ((uint32_t) h << 24) | (m << 8) | (l >> 8);
 }
 
 uint16_t MCUFRIEND_kbv::readID(void)
@@ -226,10 +206,10 @@ uint16_t MCUFRIEND_kbv::readID(void)
     ret = readReg(0x67);        //HX8347-A
     if (ret == 0x4747)
         return 0x8347;
-    ret = readReg40(0xEF);      //ILI9327: [xx 02 04 93 27 FF]
+    ret = readReg40(0xEF);      //ILI9327: [xx 02 04 93 27 FF] 
     if (ret == 0x9327)
         return 0x9327;
-//#if defined(SUPPORT_1963) && USING_16BIT_BUS
+//#if defined(SUPPORT_1963) && USING_16BIT_BUS 
     ret = readReg32(0xA1);      //SSD1963: [01 57 61 01]
     if (ret == 0x6101)
         return 0x1963;
@@ -237,7 +217,7 @@ uint16_t MCUFRIEND_kbv::readID(void)
         return 0x1526;          //subsequent begin() enables Command Access
     if (ret == 0xFF00)          //R61520: [xx FF FF 00]
         return 0x1520;          //subsequent begin() enables Command Access
-    if (ret == 0xF000)          //S6D05A1: [xx F0 F0 00]
+    if (ret == 0xF000)          //S6D05A1: [xx F0 F0 00] 
         return 0x05A1;          //subsequent begin() enables Command Access
 //#endif
 	ret = readReg40(0xBF);
@@ -261,12 +241,12 @@ uint16_t MCUFRIEND_kbv::readID(void)
     ret = readReg32(0xD7);
     if (ret == 0x8031)          //weird unknown from BangGood [xx 20 80 31] PrinceCharles
         return 0x8031;
-    ret = readReg32(0xFE) >> 8; //weird unknown from BangGood [04 20 53]
+    ret = readReg32(0xFE) >> 8; //weird unknown from BangGood [04 20 53] 
     if (ret == 0x2053)
         return 0x2053;
     uint32_t ret32 = readReg32(0x04);
     msb = ret32 >> 16;
-    ret = ret32;
+    ret = ret32;	
     if (msb == 0xE3 && ret == 0x0000) return 0xE300; //reg(04) = [xx E3 00 00] BangGood
 //    if (msb == 0x38 && ret == 0x8000) //unknown [xx 38 80 00] with D3 = 0x1602
     if (msb == 0x00 && ret == 0x8000) { //HX8357-D [xx 00 80 00]
@@ -275,7 +255,7 @@ uint16_t MCUFRIEND_kbv::readID(void)
         pushCommand(0xB9, cmds, 3);
         msb = readReg(0xD0);
         if (msb == 0x99) return 0x0099; //HX8357-D from datasheet
-        if (msb == 0x90)        //HX8357-C undocumented
+        if (msb == 0x90)        //HX8357-C undocumented  
 #endif
             return 0x9090;      //BIG CHANGE: HX8357-D was 0x8357
     }
@@ -309,12 +289,10 @@ uint16_t MCUFRIEND_kbv::readID(void)
 //	if (ret2 == 0x93)
     	return ret2;
 */
-
-ret = readReg(0);
-	return ret;          //0154, 7783, 9320, 9325, 9335, B505, B509
+	return readReg(0);          //0154, 7783, 9320, 9325, 9335, B505, B509
 }
 
- // independent cursor and window registers.   S6D0154, ST7781 increments.  ILI92320/5 do not.
+ // independent cursor and window registers.   S6D0154, ST7781 increments.  ILI92320/5 do not.  
 int16_t MCUFRIEND_kbv::readGRAM(int16_t x, int16_t y, uint16_t * block, int16_t w, int16_t h)
 {
     uint16_t ret, dummy, _MR = _MW;
@@ -505,7 +483,7 @@ void MCUFRIEND_kbv::setRotation(uint8_t r)
                 if (rotation == 1 || rotation == 2) {
                     val ^= 0x08;        // change BGR bit for LANDSCAPE and PORTRAIT_REV
                 }
-            }
+            }               
 #endif
             if (val & 0x08)
                 ORG |= 0x1000;  //BGR
@@ -754,7 +732,7 @@ void MCUFRIEND_kbv::vertScroll(int16_t top, int16_t scrollines, int16_t offset)
     if (_lcd_capable & MIPI_DCS_REV1) {
         uint8_t d[6];           // for multi-byte parameters
 /*
-        if (_lcd_ID == 0x9327) {        //panel is wired for 240x432
+        if (_lcd_ID == 0x9327) {        //panel is wired for 240x432 
             if (rotation == 2 || rotation == 3) { //180 or 270 degrees
                 if (scrollines == HEIGHT) {
                     scrollines = 432;   // we get a glitch but hey-ho
@@ -777,7 +755,7 @@ void MCUFRIEND_kbv::vertScroll(int16_t top, int16_t scrollines, int16_t offset)
 		d[0] = vsp >> 8;        //VSP
         d[1] = vsp;
         WriteCmdParamN(is8347 ? 0x14 : 0x37, 2, d);
-		if (is8347) {
+		if (is8347) { 
 		    d[0] = (offset != 0) ? (_lcd_ID == 0x8347 ? 0x02 : 0x08) : 0;
 			WriteCmdParamN(_lcd_ID == 0x8347 ? 0x18 : 0x01, 1, d);  //HX8347-D
 		} else if (offset == 0 && (_lcd_capable & MIPI_DCS_REV1)) {
@@ -791,7 +769,7 @@ void MCUFRIEND_kbv::vertScroll(int16_t top, int16_t scrollines, int16_t offset)
         WriteCmdData(0x61, _lcd_rev);   //!NDL, !VLE, REV
         WriteCmdData(0x6A, vsp);        //VL#
         break;
-#ifdef SUPPORT_0139
+#ifdef SUPPORT_0139 
     case 0x0139:
         WriteCmdData(0x07, 0x0213 | (_lcd_rev << 2));  //VLE1=1, GON=1, REV=x, D=3
         WriteCmdData(0x41, vsp);  //VL# check vsp
@@ -814,8 +792,8 @@ void MCUFRIEND_kbv::vertScroll(int16_t top, int16_t scrollines, int16_t offset)
     case 0x7793:
 	case 0x9326:
 	case 0xB509:
-        WriteCmdData(0x401, (1 << 1) | _lcd_rev);       //VLE, REV
-        WriteCmdData(0x404, vsp);       //VL#
+        WriteCmdData(0x401, (1 << 1) | _lcd_rev);       //VLE, REV 
+        WriteCmdData(0x404, vsp);       //VL# 
         break;
     default:
         // 0x6809, 0x9320, 0x9325, 0x9335, 0xB505 can only scroll whole screen
@@ -836,7 +814,7 @@ void MCUFRIEND_kbv::invertDisplay(bool i)
             if (_lcd_ID == 0x8347 || _lcd_ID == 0x5252) // HX8347-A, HX5352-A
 			    val = _lcd_rev ? 6 : 2;       //INVON id bit#2,  NORON=bit#1
             else val = _lcd_rev ? 8 : 10;     //HX8347-D, G, I: SCROLLON=bit3, INVON=bit1
-            // HX8347: 0x01 Display Mode has diff bit mapping for A, D
+            // HX8347: 0x01 Display Mode has diff bit mapping for A, D 
             WriteCmdParamN(0x01, 1, &val);
         } else
             WriteCmdParamN(_lcd_rev ? 0x21 : 0x20, 0, NULL);
@@ -863,7 +841,7 @@ void MCUFRIEND_kbv::invertDisplay(bool i)
     case 0x7793:
     case 0x9326:
 	case 0xB509:
-        WriteCmdData(0x401, (1 << 1) | _lcd_rev);       //.kbv kludge VLE
+        WriteCmdData(0x401, (1 << 1) | _lcd_rev);       //.kbv kludge VLE 
         break;
     default:
         WriteCmdData(0x61, _lcd_rev);
@@ -876,25 +854,20 @@ void MCUFRIEND_kbv::invertDisplay(bool i)
 static void init_table(const void *table, int16_t size)
 {
     //copes with any uint8_t table.  Even HX8347 style
-    //Serial.println("init_table call");
-
     uint8_t *p = (uint8_t *) table;
     while (size > 0) {
         uint8_t cmd = pgm_read_byte(p++);
         uint8_t len = pgm_read_byte(p++);
         if (cmd == TFTLCD_DELAY8) {
-            //Serial.print("delay: ");//Serial.println(len);
             delay(len);
             len = 0;
         } else {
-            //Serial.print("command: 0x");//Serial.println(cmd,HEX);
             CS_ACTIVE;
             CD_COMMAND;
             write8(cmd);
             for (uint8_t d = 0; d++ < len; ) {
                 uint8_t x = pgm_read_byte(p++);
                 CD_DATA;
-                //Serial.print("\t0x");//Serial.println(x,HEX);
                 write8(x);
                 if (is8347 && d < len) {
                     CD_COMMAND;
@@ -903,7 +876,6 @@ static void init_table(const void *table, int16_t size)
                 }
             }
             CS_IDLE;
-            //Serial.println("");
         }
         size -= len + 2;
     }
@@ -935,48 +907,48 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
 /*
 	static const uint16_t _regValues[] PROGMEM = {
     0x0000, 0x0001, // start oscillation
-    0x0007, 0x0000, //  source output control 0 D0
+    0x0007, 0x0000, //  source output control 0 D0 
     0x0013, 0x0000, // power control 3 off
-    0x0011, 0x2604, //
-    0x0014, 0x0015, //
-    0x0010, 0x3C00, //
- //    0x0013, 0x0040, //
- //    0x0013, 0x0060, //
- //    0x0013, 0x0070, //
+    0x0011, 0x2604, //    
+    0x0014, 0x0015, //   
+    0x0010, 0x3C00, //  
+ //    0x0013, 0x0040, // 
+ //    0x0013, 0x0060, //     
+ //    0x0013, 0x0070, // 
     0x0013, 0x0070, // power control 3 PON PON1 AON
-
+       
     0x0001, 0x0127, //      driver output control
  //    0x0002, 0x0700, //  field 0 b/c waveform xor waveform
-    0x0003, 0x1030, //
-    0x0007, 0x0000, //
-    0x0008, 0x0404, //
-    0x000B, 0x0200, //
-    0x000C, 0x0000, //
-    0x00015,0x0000, //
-
-    //gamma setting
-    0x0030, 0x0000,
-    0x0031, 0x0606,
-    0x0032, 0x0006,
-    0x0033, 0x0403,
-    0x0034, 0x0107,
-    0x0035, 0x0101,
-    0x0036, 0x0707,
-    0x0037, 0x0304,
-    0x0038, 0x0A00,
-    0x0039, 0x0706,
-
-    0x0040, 0x0000,
-    0x0041, 0x0000,
-    0x0042, 0x013F,
-    0x0043, 0x0000,
-    0x0044, 0x0000,
-    0x0045, 0x0000,
-    0x0046, 0xEF00,
-    0x0047, 0x013F,
-    0x0048, 0x0000,
-    0x0007, 0x0011,
-    0x0007, 0x0017,
+    0x0003, 0x1030, //    
+    0x0007, 0x0000, //    
+    0x0008, 0x0404, //    
+    0x000B, 0x0200, // 
+    0x000C, 0x0000, //   
+    0x00015,0x0000, //     
+       
+    //gamma setting    
+    0x0030, 0x0000,      
+    0x0031, 0x0606,    
+    0x0032, 0x0006,    
+    0x0033, 0x0403,  
+    0x0034, 0x0107,  
+    0x0035, 0x0101, 
+    0x0036, 0x0707,   
+    0x0037, 0x0304,   
+    0x0038, 0x0A00,     
+    0x0039, 0x0706,     
+       
+    0x0040, 0x0000,     
+    0x0041, 0x0000,      
+    0x0042, 0x013F,    
+    0x0043, 0x0000,   
+    0x0044, 0x0000,     
+    0x0045, 0x0000,     
+    0x0046, 0xEF00,    
+    0x0047, 0x013F,     
+    0x0048, 0x0000,     
+    0x0007, 0x0011,  
+    0x0007, 0x0017,     
 };
 */
 #ifdef SUPPORT_0139
@@ -1301,14 +1273,10 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
 
 #if defined(SUPPORT_1963)
     case 0x1963:
-      //Serial.println("Into support_1963");
-        _lcd_capable = AUTO_READINC | MIPI_DCS_REV1 | READ_NODUMMY | INVERT_SS | INVERT_RGB;
+        _lcd_capable = AUTO_READINC | MIPI_DCS_REV1 | READ_NODUMMY | INVERT_SS;//| INVERT_RGB;
 #if USING_16BIT_BUS
 #define SSD1963_PIXDATA 0x03
-      //Serial.println("using 16 bit pixel def");
 #else
-      //Serial.println("using 8 bit pixel def");
-
 #define SSD1963_PIXDATA 0x00
         is9797 = 1;
         _lcd_capable |= READ_24BITS;
@@ -1395,42 +1363,6 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
             (0xD0), 1, 0x0D,
         };
         // from UTFTv2.82 initlcd.h
-        static const uint8_t SSD1963_800NEW2_regValues[] PROGMEM = {
-            (0xE2), 3, 0x1E, 0x02, 0x54,        //PLL multiplier, set PLL clock to 120M
-            (0xE0), 1, 0x01,    // PLL enable
-            TFTLCD_DELAY8, 10,
-            (0xE0), 1, 0x03,    //
-            TFTLCD_DELAY8, 10,
-            0x01, 0,            //Soft Reset
-            TFTLCD_DELAY8, 100,
-            (0xE6), 3, 0x03, 0xFF, 0xFF,        //PLL setting for PCLK, depends on resolution
-            (0xB0), 7, 0x20, 0x00, 0x03, 0x1F, 0x01, 0xDF, 0x00,        //LCD SPECIFICATION
-            (0xB4), 8, 0x03, 0xA0, 0x00, 0x2E, 0x30, 0x00, 0x0F, 0x00,  //HSYNC HT=928, HPS=46, HPW=48, LPS=15
-            (0xB6), 7, 0x02, 0x0D, 0x00, 0x10, 0x10, 0x00, 0x08,        //VSYNC VT=525, VPS=16, VPW=16, FPS=8
-            (0xBA), 1, 0x0F,    //GPIO[3:0] out 1
-            (0xB8), 2, 0x07, 0x01,      //GPIO3=input, GPIO[2:0]=output
-            (0x36), 1, 0x2A, //MINE - rotation
-            (0xF0), 1, SSD1963_PIXDATA,    //pixel data interface
-            TFTLCD_DELAY8, 1,
-            (0xB8), 2, 0x0f, 0x01,      //GPIO3=input, GPIO[2:0]=output
-            (0xBA), 1, 0x01,    //GPIO[3:0] out 1
-
-
-            (0x2A), 4, 0, 0, 480>>8, 480 & 0xFF,
-            (0x2B), 4, 0, 0, 800>>8, 800 & 0xFF,
-
-            // (0x2A), 4, 0, 0, 800>>8, 800 & 0xFF,
-            // (0x2B), 4, 0, 0, 480>>8, 480 & 0xFF,
-            //
-            (0x2C), 0,
-
-
-            (0x29), 0,            //Display On
-            (0xBE), 6, 0x06, 0xF0, 0x01, 0xF0, 0x00, 0x00,      //set PWM for B/L
-            (0xD0), 1, 0x0D,
-            (0x2C), 0,
-        };
-        // from UTFTv2.82 initlcd.h
         static const uint8_t SSD1963_800ALT_regValues[] PROGMEM = {
             (0xE2), 3, 0x23, 0x02, 0x04,        //PLL multiplier, set PLL clock to 120M
             (0xE0), 1, 0x01,    // PLL enable
@@ -1483,13 +1415,11 @@ void MCUFRIEND_kbv::begin(uint16_t ID)
 //        table8_ads = SSD1963_NHD_50_regValues, table_size = sizeof(SSD1963_NHD_50_regValues);
 //        table8_ads = SSD1963_NHD_70_regValues, table_size = sizeof(SSD1963_NHD_70_regValues);
 //        table8_ads = SSD1963_800NEW_regValues, table_size = sizeof(SSD1963_800NEW_regValues);
-//        table8_ads = SSD1963_800NEW2_regValues, table_size = sizeof(SSD1963_800NEW2_regValues);
 //        table8_ads = SSD1963_800ALT_regValues, table_size = sizeof(SSD1963_800ALT_regValues);
         p16 = (int16_t *) & HEIGHT;
         *p16 = 480;
         p16 = (int16_t *) & WIDTH;
         *p16 = 800;
-        //Serial.println("written ssd1963 startup commands");
         break;
 #endif
 
@@ -3118,7 +3048,6 @@ case 0x4532:    // thanks Leodino
     }
     _lcd_rev = ((_lcd_capable & REV_SCREEN) != 0);
     if (table8_ads != NULL) {
-      //Serial.println("line 3121");
         static const uint8_t reset_off[] PROGMEM = {
             0x01, 0,            //Soft Reset
             TFTLCD_DELAY8, 150,  // .kbv will power up with ONLY reset, sleep out, display on
